@@ -110,8 +110,8 @@ export default function ProductsPage() {
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     try {
-      await productService.delete(selectedId); // Certifique-se que existe no seu service
-      loadInitialData(); // Recarrega a lista
+      await productService.delete(selectedId);
+      loadInitialData();
       setIsModalOpen(false);
     } catch (error) {
       console.log(error);
@@ -122,7 +122,6 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] p-6 font-sans">
-      {/* Header Estilo AutoFlex */}
       <header className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-[#E31E24]">
         <h1 className="text-2xl font-black text-[#212529] uppercase tracking-tight">
           Cadastro de <span className="text-[#E31E24]">Produtos</span>
@@ -133,7 +132,6 @@ export default function ProductsPage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Formulário de Cadastro */}
         <section className="bg-white p-6 rounded-xl shadow-md border border-slate-100 h-fit">
           <h2 className="text-sm font-black mb-6 text-[#212529] uppercase tracking-widest flex items-center gap-2">
             <span className="w-1.5 h-4 bg-[#E31E24] inline-block"></span>
@@ -169,7 +167,6 @@ export default function ProductsPage() {
               />
             </div>
 
-            {/* RF007: Área de Associação */}
             <div className="p-5 bg-slate-50 rounded-xl border border-dashed border-slate-300">
               <p className="text-[11px] font-black text-[#212529] mb-3 uppercase tracking-wider">
                 Composição Técnica (Insumos)
@@ -204,7 +201,6 @@ export default function ProductsPage() {
                 </button>
               </div>
 
-              {/* Lista Temporária */}
               <div className="mt-4 space-y-2">
                 {selectedMaterials.map((item) => (
                   <div
@@ -241,7 +237,6 @@ export default function ProductsPage() {
           </form>
         </section>
 
-        {/* Listagem de Produtos */}
         <section className="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden h-fit">
           <div className="bg-[#212529] p-4">
             <h2 className="text-white text-xs font-black uppercase tracking-widest">

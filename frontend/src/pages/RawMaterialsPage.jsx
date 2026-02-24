@@ -73,14 +73,13 @@ export default function RawMaterialsPage() {
     }
   };
   const openDeleteModal = (id) => {
-    setSelectedId(id); // 1. Guarda o ID do material que o usuário clicou
-    setIsModalOpen(true); // 2. Abre o modal de confirmação
+    setSelectedId(id);
+    setIsModalOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header - Identidade AutoFlex */}
         <header className="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm border-t-4 border-[#E31E24]">
           <div>
             <h1 className="text-2xl font-black text-[#212529] uppercase tracking-tight">
@@ -95,7 +94,6 @@ export default function RawMaterialsPage() {
           </span>
         </header>
 
-        {/* Formulário de Cadastro */}
         <section className="bg-white p-8 rounded-xl shadow-md border border-slate-100">
           <h2 className="text-sm font-black mb-6 text-[#212529] uppercase tracking-widest flex items-center gap-2">
             <span className="w-1.5 h-4 bg-[#E31E24] inline-block"></span>
@@ -188,7 +186,6 @@ export default function RawMaterialsPage() {
           </form>
         </section>
 
-        {/* Listagem de Materiais */}
         <section className="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden">
           <div className="bg-[#212529] p-4">
             <h2 className="text-white text-xs font-black uppercase tracking-widest">

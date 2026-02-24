@@ -9,7 +9,6 @@ const ConfirmModal = ({
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Overlay com desfoque mais intenso para foco total no alerta */}
       <div
         className="fixed inset-0 bg-[#212529]/60 backdrop-blur-md"
         onClick={onClose}

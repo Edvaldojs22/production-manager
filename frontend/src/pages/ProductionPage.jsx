@@ -22,7 +22,6 @@ export default function ProductionPage() {
   return (
     <div className="min-h-screen bg-[#F8F9FA] p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-10">
-        {/* Header - Inspirado no Hero do Site */}
         <header className="flex flex-col md:flex-row justify-between items-center bg-white p-8 rounded-xl shadow-sm border-t-4 border-[#E31E24]">
           <div className="space-y-2">
             <h1 className="text-3xl font-black text-[#212529] uppercase tracking-tight">
@@ -50,7 +49,6 @@ export default function ProductionPage() {
           </button>
         </header>
 
-        {/* Grid de Sugestões - Estilo Cards do Site */}
         {hasCalculated && (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-[#212529] flex items-center gap-2">
@@ -111,15 +109,10 @@ export default function ProductionPage() {
           </div>
         )}
 
-        {/* Footer com Estatísticas (Simulando o rodapé do site) */}
-        <footer className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-200 text-center">
-          <div>
-            <p className="text-2xl font-black text-[#212529]">AutoFlex</p>
-            <p className="text-[10px] text-slate-400 uppercase font-bold">
-              Inteligência Industrial
-            </p>
-          </div>
-          {/* Espaços para métricas se você quiser adicionar no futuro */}
+        <footer className=" w-full mt-30 ">
+          <p className="text-2xl  text-center font-black text-[#212529]">
+            AutoFlex
+          </p>
         </footer>
       </div>
     </div>
