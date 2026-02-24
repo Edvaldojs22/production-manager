@@ -32,6 +32,11 @@ public class ProductController {
         return  repository.save(product);
     }
 
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Long id){
+        repository.deleteById(id);
+    }
+
     @GetMapping("{id}")
     public  Product getById(@PathVariable Long id){
         return  repository.findById(id).orElse(null);

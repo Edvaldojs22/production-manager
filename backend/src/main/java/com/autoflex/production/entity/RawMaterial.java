@@ -2,6 +2,7 @@ package com.autoflex.production.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NonNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -18,6 +19,9 @@ public class RawMaterial {
 
     private String code;
     private String name;
+
+    private  String unit;
+
     private  Double stockQuantity;
 
     @CreationTimestamp
