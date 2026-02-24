@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 
 import RawMaterialsPage from "./pages/RawMaterialsPage";
+import ProductsPage from "./pages/ProductsPage";
 
 function App() {
   return (
@@ -11,12 +12,16 @@ function App() {
             <Link to="/materiais" className="hover:text-indigo-600 transition">
               Materiais
             </Link>
+            <Link to="/produtos" className="hover:text-indigo-600 transition">
+              Produtos
+            </Link>
           </div>
         </nav>
 
         <main className="py-8">
           <Routes>
             <Route path="/materiais" element={<RawMaterialsPage />} />
+            <Route path="/produtos" element={<ProductsPage />} />
           </Routes>
         </main>
       </div>
