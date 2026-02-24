@@ -1,0 +1,17 @@
+import api from "./api";
+
+export const materialService = {
+  getMaterials: async () => {
+    const response = await api.get("/raw-materials");
+    return response.data;
+  },
+
+  createMaterial: async (materialData) => {
+    const response = await api.post("/raw-materials", materialData);
+    return response.data;
+  },
+
+  deleteMaterial: async (id) => {
+    await api.delete(`/raw-materials/${id}`);
+  },
+};
