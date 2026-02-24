@@ -8,44 +8,52 @@ const ConfirmModal = ({
 }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Overlay com desfoque mais intenso para foco total no alerta */}
       <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-[#212529]/60 backdrop-blur-md"
         onClick={onClose}
       ></div>
 
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-md z-10 overflow-hidden transform transition-all">
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-slate-800 mb-2">{title}</h3>
-          <p className="text-slate-600">{message}</p>
+      <div className="bg-white rounded-xl shadow-2xl border-t-8 border-[#E31E24] w-full max-w-md z-10 overflow-hidden transform transition-all">
+        <div className="p-8">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl text-[#E31E24]">⚠️</span>
+            <h3 className="text-lg font-black text-[#212529] uppercase tracking-tighter">
+              {title}
+            </h3>
+          </div>
+          <p className="text-slate-500 font-medium leading-relaxed italic">
+            "{message}"
+          </p>
         </div>
 
-        <div className="bg-slate-50 p-4 flex justify-end gap-3">
+        <div className="bg-[#F8F9FA] p-6 flex justify-end gap-4 border-t border-slate-100">
           <button
             onClick={onClose}
-            disabled={isLoading} // Trava o cancelar também durante o processo
-            className="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 disabled:opacity-30 transition-colors"
+            disabled={isLoading}
+            className="px-6 py-2 text-xs font-black text-slate-400 hover:text-[#212529] uppercase tracking-widest transition-colors disabled:opacity-30"
           >
-            Voltar
+            Abortar
           </button>
 
           <button
             onClick={onConfirm}
-            disabled={isLoading} // AQUI ESTÁ A TRAVA
-            className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all flex items-center gap-2
+            disabled={isLoading}
+            className={`px-8 py-3 text-xs font-black rounded uppercase tracking-[0.2em] transition-all flex items-center gap-3 shadow-lg
               ${
                 isLoading
-                  ? "bg-red-300 cursor-not-allowed text-white"
-                  : "bg-red-500 hover:bg-red-600 text-white shadow-md active:scale-95"
+                  ? "bg-slate-300 cursor-not-allowed text-white shadow-none"
+                  : "bg-[#E31E24] hover:bg-[#c1191f] text-white active:scale-95 shadow-red-100"
               }`}
           >
             {isLoading ? (
               <>
                 <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-                Processando...
+                Sincronizando...
               </>
             ) : (
-              "Confirmar Exclusão"
+              "Confirmar Ação"
             )}
           </button>
         </div>

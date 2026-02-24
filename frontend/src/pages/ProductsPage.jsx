@@ -121,60 +121,75 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      <header className="border-b pb-4">
-        <h1 className="text-2xl font-bold text-slate-800">
-          Cadastro de Produtos
+    <div className="min-h-screen bg-[#F8F9FA] p-6 font-sans">
+      {/* Header Estilo AutoFlex */}
+      <header className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-[#E31E24]">
+        <h1 className="text-2xl font-black text-[#212529] uppercase tracking-tight">
+          Cadastro de <span className="text-[#E31E24]">Produtos</span>
         </h1>
-        <p className="text-slate-500 text-sm">
-          Defina os produtos e suas composições
+        <p className="text-slate-500 text-sm font-medium">
+          Gerencie o catálogo e a composição técnica de montagem.
         </p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Formulário de Cadastro */}
-        <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
-          <h2 className="text-lg font-semibold mb-4 text-slate-700">
-            Novo Produto
+        <section className="bg-white p-6 rounded-xl shadow-md border border-slate-100 h-fit">
+          <h2 className="text-sm font-black mb-6 text-[#212529] uppercase tracking-widest flex items-center gap-2">
+            <span className="w-1.5 h-4 bg-[#E31E24] inline-block"></span>
+            Novo Item de Produção
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              className="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Nome do Produto (ex: Cadeira de Aço)"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              required
-            />
-            <input
-              className="w-full border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-indigo-500"
-              type="number"
-              step="0.01"
-              placeholder="Preço de Venda (R$)"
-              value={productPrice}
-              onChange={(e) => setProductPrice(e.target.value)}
-              required
-            />
 
-            {/* RF007: Área de Associação de Matéria-Prima */}
-            <div className="p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-              <p className="text-sm font-bold text-slate-600 mb-2">
-                Adicionar Matéria-Prima
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">
+                Nome do Produto
+              </label>
+              <input
+                className="w-full border border-slate-200 rounded-md p-3 outline-none focus:border-[#E31E24] transition-colors bg-slate-50"
+                placeholder="Ex: Amortecedor Rebaixado"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">
+                Preço de Venda (R$)
+              </label>
+              <input
+                className="w-full border border-slate-200 rounded-md p-3 outline-none focus:border-[#E31E24] transition-colors bg-slate-50 font-bold text-[#212529]"
+                type="number"
+                step="0.01"
+                placeholder="0,00"
+                value={productPrice}
+                onChange={(e) => setProductPrice(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* RF007: Área de Associação */}
+            <div className="p-5 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+              <p className="text-[11px] font-black text-[#212529] mb-3 uppercase tracking-wider">
+                Composição Técnica (Insumos)
               </p>
+
               <div className="flex gap-2">
                 <select
-                  className="flex-1 border border-slate-300 rounded-lg p-2 bg-white"
+                  className="flex-1 border border-slate-200 rounded-md p-2.5 bg-white text-sm outline-none focus:border-[#E31E24]"
                   value={currentMaterialId}
                   onChange={(e) => setCurrentMaterialId(e.target.value)}
                 >
-                  <option value="">Selecione o Material...</option>
+                  <option value="">Selecionar Material...</option>
                   {materials.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.name} | Estoque: {m.stockQuantity} {m.unit}
+                      {m.name} | {m.stockQuantity} {m.unit}
                     </option>
                   ))}
                 </select>
                 <input
-                  className="w-20 border border-slate-300 rounded-lg p-2 bg-white"
+                  className="w-20 border border-slate-200 rounded-md p-2 bg-white text-center outline-none focus:border-[#E31E24]"
                   type="number"
                   placeholder="Qtd"
                   value={currentQuantity}
@@ -183,28 +198,33 @@ export default function ProductsPage() {
                 <button
                   type="button"
                   onClick={addMaterialToRecipe}
-                  className="bg-slate-800 text-white px-4 rounded-lg hover:bg-slate-700"
+                  className="bg-[#212529] text-white px-5 rounded-md hover:bg-black transition-colors font-bold"
                 >
                   +
                 </button>
               </div>
 
-              {/* Lista Temporária de Materiais (A Receita) */}
+              {/* Lista Temporária */}
               <div className="mt-4 space-y-2">
                 {selectedMaterials.map((item) => (
                   <div
                     key={item.materialId}
-                    className="flex justify-between items-center bg-white p-2 rounded border text-sm"
+                    className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-100 shadow-sm animate-in fade-in zoom-in duration-200"
                   >
-                    <span>
-                      {item.name} x <strong>{item.quantity}</strong>
+                    <span className="text-xs font-bold text-slate-600">
+                      {item.name}{" "}
+                      <span className="text-[#E31E24] ml-2 font-black">
+                        x {item.quantity}
+                      </span>
                     </span>
                     <button
                       type="button"
                       onClick={() => removeMaterialFromRecipe(item.materialId)}
-                      className="text-red-500 hover:font-bold"
+                      className="text-slate-300 hover:text-[#E31E24] transition-colors"
                     >
-                      remover
+                      <span className="text-[10px] font-black uppercase">
+                        Remover
+                      </span>
                     </button>
                   </div>
                 ))}
@@ -214,68 +234,65 @@ export default function ProductsPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-all"
+              className="w-full bg-[#E31E24] text-white font-black py-4 rounded-md hover:bg-[#c1191f] shadow-lg shadow-red-200 disabled:opacity-50 transition-all uppercase tracking-widest text-sm"
             >
-              {isSubmitting ? "Salvando..." : "Salvar Produto Completo"}
+              {isSubmitting ? "Gravando no Sistema..." : "Finalizar Cadastro"}
             </button>
           </form>
         </section>
 
         {/* Listagem de Produtos */}
-        <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-fit">
+        <section className="bg-white rounded-xl shadow-md border border-slate-100 overflow-hidden h-fit">
+          <div className="bg-[#212529] p-4">
+            <h2 className="text-white text-xs font-black uppercase tracking-widest">
+              Catálogo de Itens
+            </h2>
+          </div>
           <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="px-4 py-3 text-slate-600 font-semibold">
+                <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase">
                   Produto
                 </th>
-                <th className="px-4 py-3 text-slate-600 font-semibold">
+                <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase">
                   Preço
                 </th>
-                <th className="px-4 py-3 text-slate-600 font-semibold">
-                  Composição
-                </th>
-                <th className="px-4 py-3 text-slate-600 font-semibold text-right">
+                <th className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase text-right">
                   Ações
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-50">
               {products.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-4 font-medium text-slate-700">
-                    {p.name}
+                <tr
+                  key={p.id}
+                  className="hover:bg-slate-50 transition-colors group"
+                >
+                  <td className="px-4 py-4">
+                    <p className="font-bold text-[#212529] text-sm uppercase">
+                      {p.name}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {p.materials?.map((item) => (
+                        <span
+                          key={item.id}
+                          className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold uppercase"
+                        >
+                          {item.rawMaterial?.name}: {item.requiredQuantity}
+                        </span>
+                      ))}
+                    </div>
                   </td>
-
-                  <td className="px-4 py-4 text-emerald-600 font-bold">
+                  <td className="px-4 py-4 font-black text-[#E31E24] text-sm">
                     R${" "}
                     {p.price.toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
                     })}
                   </td>
-
-                  <td className="px-4 py-4">
-                    <div className="flex flex-wrap gap-2">
-                      {p.materials?.map((item) => (
-                        <span
-                          key={item.id}
-                          className="inline-flex items-center bg-indigo-50 text-indigo-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-indigo-100"
-                        >
-                          {/* Navegando até o nome dentro de rawMaterial */}
-                          {item.rawMaterial?.name}: {item.requiredQuantity}
-                        </span>
-                      ))}
-                      {(!p.materials || p.materials.length === 0) && (
-                        <span className="text-slate-400 text-xs italic">
-                          Sem materiais
-                        </span>
-                      )}
-                    </div>
-                  </td>
                   <td className="px-4 py-4 text-right">
                     <button
                       onClick={() => openDeleteModal(p.id)}
-                      className="text-red-500 hover:text-red-700 font-medium text-sm p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      className="opacity-0 group-hover:opacity-100 bg-red-50 text-[#E31E24] text-[10px] font-black px-3 py-1.5 rounded uppercase transition-all"
                     >
                       Excluir
                     </button>
@@ -286,11 +303,12 @@ export default function ProductsPage() {
           </table>
         </section>
       </div>
+
       <ConfirmModal
         isOpen={isModalOpen}
         isLoading={isDeleting}
-        title="Excluir Produto"
-        message="Tem certeza que deseja excluir este produto? A composição associada também será removida."
+        title="EXCLUIR REGISTRO"
+        message="Confirma a remoção permanente deste produto e sua composição técnica?"
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleConfirmDelete}
       />
