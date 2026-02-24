@@ -1,0 +1,29 @@
+### 1. Criar Matéria-Prima
+POST http://localhost:8080/api/raw-materials
+Content-Type: application/json
+
+{
+  "name": "Parafusso",
+  "stockQuantity": 300
+}
+
+### 1.1 Deletar uma materia prima
+DELETE  http://localhost:8080/api/raw-materials/2
+
+### 2.Criar um produto
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+  "name": "Motor",
+  "price": 10000.0,
+  "materials": [
+    {
+      "rawMaterial": { "id": 5 },
+      "requiredQuantity": 134.0
+    }
+  ]
+}
+### 3. Testar a Sugestão do mais caro ao mais barato
+GET http://localhost:8080/api/products/suggest
+
