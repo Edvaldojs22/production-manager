@@ -2,6 +2,8 @@ package com.autoflex.production.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -25,6 +27,8 @@ public class ProductMaterial {
     @JoinColumn(name = "material_id")
     private RawMaterial rawMaterial;
 
+    @NotNull(message = "mandatory required quantity")
+    @Min(value = 0, message = "The quantity must be greater than or equal to zero")
     @Column(nullable = false)
     private Double requiredQuantity;
 
