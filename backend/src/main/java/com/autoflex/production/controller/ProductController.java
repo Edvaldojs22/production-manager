@@ -32,6 +32,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
+<<<<<<< HEAD
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productionService.delete(id);
@@ -43,6 +44,16 @@ public class ProductController {
     public ResponseEntity<Product> getById(@PathVariable Long id) {
         Product product = productionService.findById(id);
         return ResponseEntity.ok(product); // Status 200
+=======
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Long id){
+        repository.deleteById(id);
+    }
+
+    @GetMapping("{id}")
+    public  Product getById(@PathVariable Long id){
+        return  repository.findById(id).orElse(null);
+>>>>>>> 603684f7b7081ae827099c392a75991993a13d2c
     }
 
     @GetMapping("/suggest")

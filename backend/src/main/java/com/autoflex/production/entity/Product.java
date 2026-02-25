@@ -20,7 +20,10 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
     @NotBlank(message = "mandatory name")
+=======
+>>>>>>> 603684f7b7081ae827099c392a75991993a13d2c
     @Column(nullable = false)
     private String name;
 
