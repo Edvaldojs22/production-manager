@@ -15,7 +15,6 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin("*")
 public class ProductController {
 
     @Autowired
@@ -24,36 +23,25 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<Product>> getAll() {
         List<Product> products = productionService.listAll();
-        return ResponseEntity.ok(products); // Status 200
+        return ResponseEntity.ok(products);
     }
+
     @PostMapping
     public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
         Product savedProduct = productionService.saveProduct(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
-<<<<<<< HEAD
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productionService.delete(id);
-        return ResponseEntity.noContent().build(); // Status 204
+        return ResponseEntity.noContent().build();
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getById(@PathVariable Long id) {
         Product product = productionService.findById(id);
-        return ResponseEntity.ok(product); // Status 200
-=======
-    @DeleteMapping("{id}")
-    public void delete(@PathVariable Long id){
-        repository.deleteById(id);
-    }
-
-    @GetMapping("{id}")
-    public  Product getById(@PathVariable Long id){
-        return  repository.findById(id).orElse(null);
->>>>>>> 603684f7b7081ae827099c392a75991993a13d2c
+        return ResponseEntity.ok(product);
     }
 
     @GetMapping("/suggest")
