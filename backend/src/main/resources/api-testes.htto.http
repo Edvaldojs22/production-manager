@@ -1,14 +1,20 @@
 ### 1. Criar Matéria-Prima
 POST http://localhost:8080/api/raw-materials
 Content-Type: application/json
-
 {
-  "name": "Parafusso",
-  "stockQuantity": 300
+  "name": "Broc33",
+  "code": "das3",
+  "stockQuantity": -1
 }
 
 ### 1.1 Deletar uma materia prima
 DELETE  http://localhost:8080/api/raw-materials/2
+
+### 1.2 Busca uma materia prima pelo code
+GET http://localhost:8080/api/raw-materials/code/MP3424
+
+### 1.3 Atualiza o estoque com valor novo
+PATCH  http://localhost:8080/api/raw-materials/11/stock?quantity=-150
 
 ### 2.Criar um produto
 POST http://localhost:8080/api/products
@@ -24,6 +30,7 @@ Content-Type: application/json
     }
   ]
 }
+
 ### 3. Testar a Sugestão do mais caro ao mais barato
 GET http://localhost:8080/api/products/suggest
 
