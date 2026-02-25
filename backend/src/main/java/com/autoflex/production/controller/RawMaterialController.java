@@ -1,10 +1,13 @@
 package com.autoflex.production.controller;
 
 import com.autoflex.production.entity.RawMaterial;
-import com.autoflex.production.repository.RawMaterialRepository;
 import com.autoflex.production.service.RawMaterialService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +21,10 @@ public class RawMaterialController {
     private RawMaterialService rawMaterialService;
 
     @GetMapping
-    public ResponseEntity<List<RawMaterial>> getAll() {
-        List<RawMaterial> materials = rawMaterialService.findAll();
+    public ResponseEntity<Page<RawMaterial>> getAll(
+            @PageableDefault(size= 3, sort = "name")Pageable pageable
+            ) {
+        Page<RawMaterial> materials = rawMaterialService.findAll(pageable);
         return ResponseEntity.ok(materials);
     }
 
