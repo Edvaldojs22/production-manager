@@ -6,6 +6,11 @@ export const materialService = {
     return response.data;
   },
 
+  getMaterialByCode: async (code) => {
+    const response = await api.get(`/raw-materials/code/${code}`);
+    return response.data;
+  },
+
   createMaterial: async (materialData) => {
     const response = await api.post("/raw-materials", materialData);
     return response.data;

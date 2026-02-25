@@ -2,7 +2,11 @@ package com.autoflex.production.controller;
 
 import com.autoflex.production.entity.RawMaterial;
 import com.autoflex.production.repository.RawMaterialRepository;
+import com.autoflex.production.service.RawMaterialService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,20 +16,29 @@ import java.util.List;
 @CrossOrigin("*")
 public class RawMaterialController {
     @Autowired
-    private RawMaterialRepository repository;
+    private RawMaterialService rawMaterialService;
 
     @GetMapping
-    public List<RawMaterial> getAll(){
-        return  repository.findAll();
+    public ResponseEntity<List<RawMaterial>> getAll() {
+        List<RawMaterial> materials = rawMaterialService.findAll();
+        return ResponseEntity.ok(materials);
+    }
+
+    @GetMapping("/code/{code}")
+    public ResponseEntity<RawMaterial> getByCode(@PathVariable String code) {
+        RawMaterial material = rawMaterialService.searchByCode(code);
+        return ResponseEntity.ok(material);
     }
 
     @PostMapping
-    public  RawMaterial create(@RequestBody RawMaterial material){
-        return  repository.save(material);
+    public ResponseEntity<RawMaterial> create(@Valid  @RequestBody RawMaterial material) {
+        RawMaterial savedMaterial = rawMaterialService.save(material);
+        return new ResponseEntity<>(savedMaterial, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("{id}")
-    public void delete(@PathVariable Long id){
-        repository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        rawMaterialService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
