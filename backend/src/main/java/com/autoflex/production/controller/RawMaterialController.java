@@ -40,11 +40,14 @@ public class RawMaterialController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         rawMaterialService.delete(id);
         return ResponseEntity.noContent().build();
+<<<<<<< HEAD
     }
 
     @PatchMapping("/{id}/stock")
     public ResponseEntity<RawMaterial>updateStock(@PathVariable Long id, @RequestParam Double quantity){
         RawMaterial updated = rawMaterialService.updateStock(id,quantity);
         return  ResponseEntity.ok(updated);
+=======
+>>>>>>> 603684f7b7081ae827099c392a75991993a13d2c
     }
 }

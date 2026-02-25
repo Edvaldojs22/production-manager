@@ -49,6 +49,7 @@ public class RawMaterialService {
     public List<RawMaterial> findAll() {
         return repository.findAll();
     }
+<<<<<<< HEAD
 
     public  RawMaterial updateStock(Long id, Double quantityChange ){
         RawMaterial material = repository.findById(id)
@@ -68,4 +69,6 @@ public class RawMaterialService {
 
         return  repository.save(material);
     }
+=======
+>>>>>>> 603684f7b7081ae827099c392a75991993a13d2c
 }
