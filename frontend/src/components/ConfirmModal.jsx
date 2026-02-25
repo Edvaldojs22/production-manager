@@ -33,7 +33,7 @@ const ConfirmModal = ({
             disabled={isLoading}
             className="px-6 py-2 text-xs font-black text-slate-400 hover:text-[#212529] uppercase tracking-widest transition-colors disabled:opacity-30"
           >
-            Abortar
+            Abort
           </button>
 
           <button
@@ -49,10 +49,10 @@ const ConfirmModal = ({
             {isLoading ? (
               <>
                 <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
-                Sincronizando...
+                Syncing...
               </>
             ) : (
-              "Confirmar Ação"
+              "Confirm Action"
             )}
           </button>
         </div>
