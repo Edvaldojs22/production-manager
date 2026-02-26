@@ -7,7 +7,7 @@ import PageHeader from "../components/PageHeader";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
-  const [materials, setMaterials] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,9 +18,29 @@ export default function ProductsPage() {
   const [productName, setProductName] = useState("");
   const [productPrice, setProductPrice] = useState("");
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-
-  const [currentMaterialId, setCurrentMaterialId] = useState("");
   const [currentQuantity, setCurrentQuantity] = useState("");
+  const [searchMatCode, setSearchMatCode] = useState("");
+  const [searchingMat, setSearchingMat] = useState(false);
+  const [foundMaterial, setFoundMaterial] = useState(null);
+
+  const handleFindMaterial = async () => {
+    if (!searchMatCode.trim()) return;
+    setSearchingMat(true);
+    try {
+      const data = await materialService.getMaterialByCode(
+        searchMatCode.toUpperCase(),
+      );
+      if (data) {
+        setFoundMaterial(data); // Guardamos o objeto todo aqui
+      } else {
+        alert("Material not found.");
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setSearchingMat(false);
+    }
+  };
 
   useEffect(() => {
     loadInitialData();
@@ -29,13 +49,9 @@ export default function ProductsPage() {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      const [prodData, matData] = await Promise.all([
-        productService.getAll(),
-        materialService.getMaterials(),
-      ]);
+      const prodData = await productService.getAll();
 
       setProducts(prodData);
-      setMaterials(matData);
     } catch (err) {
       console.log(err);
     } finally {
@@ -44,27 +60,27 @@ export default function ProductsPage() {
   };
 
   const addMaterialToRecipe = () => {
-    if (!currentMaterialId || !currentQuantity) return;
+    if (!foundMaterial || !currentQuantity) return;
 
-    const materialObj = materials.find(
-      (m) => m.id === parseInt(currentMaterialId),
-    );
-
-    if (selectedMaterials.find((item) => item.materialId === materialObj.id)) {
-      alert("Este material já está na receita!");
+    if (
+      selectedMaterials.find((item) => item.materialId === foundMaterial.id)
+    ) {
+      alert("This material is already in the recipe!");
       return;
     }
 
     const newItem = {
-      materialId: materialObj.id,
-      name: materialObj.name,
+      materialId: foundMaterial.id,
+      name: foundMaterial.name,
       quantity: Number(currentQuantity),
     };
 
     setSelectedMaterials([...selectedMaterials, newItem]);
-    console.log(newItem);
-    setCurrentMaterialId("");
+
+    setFoundMaterial(null);
+
     setCurrentQuantity("");
+    setSearchMatCode("");
   };
 
   const removeMaterialFromRecipe = (id) => {
@@ -175,33 +191,66 @@ export default function ProductsPage() {
                 Technical Composition (Raw Materials)
               </p>
 
-              <div className="flex flex-wrap gap-2">
-                <select
-                  className="flex-1 border border-slate-200 rounded-md p-2.5 bg-white text-sm outline-none focus:border-[#E31E24]"
-                  value={currentMaterialId}
-                  onChange={(e) => setCurrentMaterialId(e.target.value)}
-                >
-                  <option value="">Select Material...</option>
-                  {materials.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} | Stock: {m.stockQuantity} {m.unit}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  className="w-20 border border-slate-200 rounded-md p-2 bg-white text-center outline-none focus:border-[#E31E24]"
-                  type="number"
-                  placeholder="Qty"
-                  value={currentQuantity}
-                  onChange={(e) => setCurrentQuantity(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={addMaterialToRecipe}
-                  className="bg-[#212529] text-white py-2 px-5 rounded-md hover:bg-black transition-colors font-bold"
-                >
-                  +
-                </button>
+              <div className="p-5 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                <p className="text-[11px] font-black text-[#212529] mb-3 uppercase tracking-wider">
+                  Technical Composition (Add Materials)
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 border border-slate-200 rounded-md p-2.5 bg-white text-xs outline-none focus:border-[#E31E24] font-mono uppercase"
+                      placeholder="Enter SKU Code (ex: AF-101)"
+                      value={searchMatCode}
+                      onChange={(e) => setSearchMatCode(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleFindMaterial}
+                      className="bg-[#212529] text-white px-6 rounded-md text-[10px] font-black hover:bg-black transition-all uppercase tracking-widest"
+                    >
+                      {searchingMat ? "Searching..." : "Find"}
+                    </button>
+                  </div>
+
+                  {foundMaterial && (
+                    <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-emerald-100 animate-in slide-in-from-top-2 duration-300">
+                      <div className="flex-1">
+                        <p className="text-[9px] font-black text-emerald-500 uppercase">
+                          Material Found
+                        </p>
+                        <p className="text-sm font-bold text-slate-700">
+                          {/* Pegamos o nome direto do objeto encontrado */}
+                          {foundMaterial.name}
+                          <span className="ml-2 text-[10px] text-slate-400 font-mono">
+                            ({foundMaterial.code})
+                          </span>
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          Available: {foundMaterial.stockQuantity}{" "}
+                          {foundMaterial.unit}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="w-24 border-2 border-slate-100 rounded-md p-2 bg-slate-50 text-center outline-none focus:border-[#E31E24] font-bold text-sm"
+                          type="number"
+                          placeholder="Qty"
+                          value={currentQuantity}
+                          onChange={(e) => setCurrentQuantity(e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={addMaterialToRecipe}
+                          className="bg-[#E31E24] text-white h-10 w-10 rounded-md hover:bg-[#c1191f] transition-all font-black text-xl shadow-md flex items-center justify-center"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="mt-4 space-y-2">
