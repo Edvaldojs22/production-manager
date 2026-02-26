@@ -15,6 +15,10 @@ export default function RawMaterialsPage() {
   const [stockValue, setStockValue] = useState("");
 
   const [materials, setMaterials] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -24,16 +28,21 @@ export default function RawMaterialsPage() {
   });
 
   useEffect(() => {
-    loadMaterials();
+    loadMaterials(0);
   }, []);
 
-  const loadMaterials = async () => {
+  const loadMaterials = async (page = 0) => {
     setLoading(true);
     try {
-      const data = await materialService.getMaterials(searchCode);
-      setMaterials(data);
+      const data = await materialService.getMaterials(page);
+
+      setMaterials(data.content || []);
+      setTotalPages(data.page?.totalPages || 0);
+      setTotalElements(data.page?.totalElements || 0);
+      setCurrentPage(data.page?.number || 0);
     } catch (err) {
-      console.log(err);
+      console.log("Error loading materials:", err);
+      setMaterials([]);
     } finally {
       setLoading(false);
     }
@@ -51,7 +60,7 @@ export default function RawMaterialsPage() {
     try {
       await materialService.createMaterial(dataToSubmit);
       setFormData({ name: "", code: "", unit: "", stockQuantity: "" });
-      loadMaterials();
+      loadMaterials(currentPage);
     } catch (err) {
       console.log(err);
     } finally {
@@ -61,7 +70,7 @@ export default function RawMaterialsPage() {
 
   const handleSearch = async () => {
     if (!searchCode.trim()) {
-      loadMaterials();
+      loadMaterials(0);
       return;
     }
 
@@ -69,6 +78,7 @@ export default function RawMaterialsPage() {
     try {
       const data = await materialService.getMaterialByCode(searchCode);
       setMaterials(data ? [data] : []);
+      setTotalPages(1);
     } catch (err) {
       console.error("Material not found", err);
       setMaterials([]);
@@ -95,7 +105,7 @@ export default function RawMaterialsPage() {
     try {
       await materialService.updateStock(selectedMaterial.id, finalValue);
       setIsStockModalOpen(false);
-      loadMaterials();
+      loadMaterials(currentPage);
     } catch (err) {
       const errorMessage =
         err.response?.data?.message || "Unexpected error updating stock.";
@@ -107,14 +117,9 @@ export default function RawMaterialsPage() {
     setDeleting(true);
     try {
       await materialService.deleteMaterial(selectedId);
-      await loadMaterials();
+      await loadMaterials(currentPage);
       setIsModalOpen(false);
     } catch (erro) {
-      if (erro.response?.status === 500) {
-        console.log(
-          "LINK ERROR: This material is part of an active product composition and cannot be removed.",
-        );
-      }
       console.log(erro);
     } finally {
       setDeleting(false);
@@ -135,7 +140,7 @@ export default function RawMaterialsPage() {
           subtitle="Control of raw materials and base stock."
         >
           <span className="bg-slate-100 text-slate-600 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
-            {materials.length} items in system
+            {totalElements} total items
           </span>
         </PageHeader>
 
@@ -167,7 +172,7 @@ export default function RawMaterialsPage() {
 
             <div className="flex flex-col gap-1">
               <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">
-                SKU Code
+                Code material
               </label>
               <input
                 className="border border-slate-200 uppercase rounded-md p-3 bg-slate-50 focus:border-[#E31E24] outline-none transition-all text-sm font-mono"
@@ -252,7 +257,7 @@ export default function RawMaterialsPage() {
             <button
               onClick={() => {
                 setSearchCode("");
-                loadMaterials();
+                loadMaterials(0);
               }}
               className="text-slate-400 hover:text-[#E31E24] text-[10px] font-bold uppercase"
             >
@@ -261,7 +266,6 @@ export default function RawMaterialsPage() {
           )}
         </section>
 
-        {/* INVENTORY SECTION - CARD LAYOUT */}
         <section className="space-y-4">
           <div className="bg-[#212529] p-4 rounded-xl shadow-md border-b-4 border-[#E31E24]">
             <h2 className="text-white text-xs font-black uppercase tracking-widest text-center">
@@ -277,7 +281,7 @@ export default function RawMaterialsPage() {
                   Accessing Database...
                 </p>
               </div>
-            ) : (
+            ) : materials.length > 0 ? (
               materials.map((m) => (
                 <div
                   key={m.id}
@@ -285,7 +289,7 @@ export default function RawMaterialsPage() {
                 >
                   <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex justify-between items-center">
                     <span className="font-mono text-[10px] text-slate-400 font-bold uppercase">
-                      SKU: {m.code || "N/A"}
+                      Code: {m.code || "N/A"}
                     </span>
                     <span className="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-black">
                       Stock
@@ -327,13 +331,13 @@ export default function RawMaterialsPage() {
                     <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-50">
                       <button
                         onClick={() => openStockModal(m)}
-                        className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase tracking-wider"
+                        className="bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
                       >
                         Stock
                       </button>
                       <button
                         onClick={() => openDeleteModal(m.id)}
-                        className="flex items-center justify-center gap-2 bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase tracking-wider"
+                        className="bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
                       >
                         Delete
                       </button>
@@ -341,8 +345,47 @@ export default function RawMaterialsPage() {
                   </div>
                 </div>
               ))
+            ) : (
+              <div className="col-span-full bg-white p-12 rounded-xl text-center border-2 border-dashed border-slate-200 text-slate-400 font-bold uppercase text-xs">
+                No materials found in this section.
+              </div>
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm mt-6">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Showing page {currentPage + 1} of {totalPages}
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentPage === 0}
+                  onClick={() => loadMaterials(currentPage - 1)}
+                  className="px-4 py-2 bg-white border border-slate-200 text-[#212529] rounded-md text-[10px] font-black uppercase hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  Previous
+                </button>
+
+                <div className="flex gap-1">
+                  {[...Array(totalPages)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-1.5 h-1.5 rounded-full ${i === currentPage ? "bg-[#E31E24]" : "bg-slate-200"}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  disabled={currentPage + 1 >= totalPages}
+                  onClick={() => loadMaterials(currentPage + 1)}
+                  className="px-4 py-2 bg-[#212529] text-white rounded-md text-[10px] font-black uppercase hover:bg-black disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {isStockModalOpen && (
@@ -350,17 +393,9 @@ export default function RawMaterialsPage() {
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border-t-4 border-[#212529]">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-black text-[#212529] uppercase tracking-tight">
-                      Movement Adjustment
-                    </h3>
-                    <p className="text-xs text-slate-500 font-bold uppercase mt-1">
-                      {selectedMaterial?.name} —{" "}
-                      <span className="font-mono text-[#E31E24]">
-                        {selectedMaterial?.code}
-                      </span>
-                    </p>
-                  </div>
+                  <h3 className="text-lg font-black text-[#212529] uppercase tracking-tight">
+                    Movement Adjustment
+                  </h3>
                   <button
                     onClick={() => setIsStockModalOpen(false)}
                     className="text-slate-400 hover:text-black"
@@ -368,7 +403,6 @@ export default function RawMaterialsPage() {
                     ✕
                   </button>
                 </div>
-
                 <div className="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-100 text-center">
                   <span className="block text-[10px] font-black text-slate-400 uppercase mb-1">
                     Current store inventory
@@ -377,45 +411,29 @@ export default function RawMaterialsPage() {
                     {selectedMaterial?.stockQuantity} {selectedMaterial?.unit}
                   </span>
                 </div>
-
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-1">
-                      Operation Quantity
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full border-2 border-slate-100 rounded-md p-4 text-xl font-black outline-none focus:border-[#212529] transition-all"
-                      placeholder="0.00"
-                      value={stockValue}
-                      onChange={(e) => setStockValue(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 pt-2">
+                  <input
+                    type="number"
+                    className="w-full border-2 border-slate-100 rounded-md p-4 text-xl font-black outline-none focus:border-[#212529]"
+                    placeholder="0.00"
+                    value={stockValue}
+                    onChange={(e) => setStockValue(e.target.value)}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => handleUpdateStock(false)}
-                      className="bg-amber-500 hover:bg-amber-600 text-white font-black py-4 rounded-md uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all"
+                      className="bg-amber-500 text-white font-black py-4 rounded-md uppercase text-xs"
                     >
                       Withdraw (-)
                     </button>
                     <button
                       onClick={() => handleUpdateStock(true)}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 rounded-md uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all"
+                      className="bg-emerald-500 text-white font-black py-4 rounded-md uppercase text-xs"
                     >
                       Add (+)
                     </button>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-slate-50 p-4 text-center">
-                <button
-                  onClick={() => setIsStockModalOpen(false)}
-                  className="text-[10px] font-black text-slate-400 uppercase hover:text-slate-600"
-                >
-                  Cancel and Return
-                </button>
               </div>
             </div>
           </div>

@@ -1,8 +1,8 @@
 import api from "./api";
 
 export const materialService = {
-  getMaterials: async () => {
-    const response = await api.get("/raw-materials");
+  getMaterials: async (page = 0, size = 3) => {
+    const response = await api.get(`/raw-materials?page=${page}&size=${size}`);
     return response.data;
   },
 
