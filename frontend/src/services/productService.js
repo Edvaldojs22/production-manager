@@ -19,4 +19,8 @@ export const productService = {
   delete: async (id) => {
     await api.delete(`/products/${id}`);
   },
+
+  upadateMaterials: async (id, materialsList) => {
+    await api.put(`/products/${id}`, materialsList);
+  },
 };

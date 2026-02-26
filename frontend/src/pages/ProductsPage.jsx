@@ -5,41 +5,47 @@ import { productService } from "../services/productService";
 import { materialService } from "../services/materialService";
 import PageHeader from "../components/PageHeader";
 import ActionCard from "../components/ActionCard";
+import DetailDrawer from "../components/DetailDrawer";
+import { Calendar, Edit3, Eye, Save, Trash2 } from "lucide-react";
+import { formatDate } from "../utils/fomateData";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
+  const [ui, setUi] = useState({
+    loading: false,
+    submitting: false,
+    deleting: false,
+  });
 
-  const [loading, setLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    price: "",
+    materials: [],
+    searchCode: "",
+    foundMaterial: null,
+    quantity: "",
+  });
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [edit, setEdit] = useState({
+    isOpen: false,
+    product: null,
+    materials: [],
+    searchCode: "",
+    foundMaterial: null,
+    quantity: "",
+  });
 
-  const [productName, setProductName] = useState("");
-  const [productPrice, setProductPrice] = useState("");
-  const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [currentQuantity, setCurrentQuantity] = useState("");
-  const [searchMatCode, setSearchMatCode] = useState("");
-  const [searchingMat, setSearchingMat] = useState(false);
-  const [foundMaterial, setFoundMaterial] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, id: null });
 
-  const handleFindMaterial = async () => {
-    if (!searchMatCode.trim()) return;
-    setSearchingMat(true);
+  const loadInitialData = async () => {
+    setUi((prev) => ({ ...prev, loading: true }));
     try {
-      const data = await materialService.getMaterialByCode(
-        searchMatCode.toUpperCase(),
-      );
-      if (data) {
-        setFoundMaterial(data);
-      } else {
-        alert("Material not found.");
-      }
+      const data = await productService.getAll();
+      setProducts(data);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
-      setSearchingMat(false);
+      setUi((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -47,101 +53,154 @@ export default function ProductsPage() {
     loadInitialData();
   }, []);
 
-  const loadInitialData = async () => {
-    setLoading(true);
-    try {
-      const prodData = await productService.getAll();
+  const handleFindMaterial = async (mode) => {
+    const isEdit = mode === "edit";
+    const code = isEdit ? edit.searchCode : form.searchCode;
 
-      setProducts(prodData);
+    if (!code.trim()) return;
+    setUi((prev) => ({ ...prev, submitting: true }));
+
+    try {
+      const data = await materialService.getMaterialByCode(code.toUpperCase());
+      if (data) {
+        isEdit
+          ? setEdit((prev) => ({ ...prev, foundMaterial: data }))
+          : setForm((prev) => ({ ...prev, foundMaterial: data }));
+      } else {
+        alert("Material not found.");
+      }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     } finally {
-      setLoading(false);
+      setUi((prev) => ({ ...prev, submitting: false }));
     }
   };
 
-  const addMaterialToRecipe = () => {
-    if (!foundMaterial || !currentQuantity) return;
+  const addMaterial = (mode) => {
+    const isEdit = mode === "edit";
+    const target = isEdit ? edit : form;
+
+    if (!target.foundMaterial || !target.quantity) return;
 
     if (
-      selectedMaterials.find((item) => item.materialId === foundMaterial.id)
+      target.materials.some((m) => m.materialId === target.foundMaterial.id)
     ) {
-      alert("This material is already in the recipe!");
+      alert("Material already in recipe!");
       return;
     }
 
     const newItem = {
-      materialId: foundMaterial.id,
-      name: foundMaterial.name,
-      quantity: Number(currentQuantity),
+      materialId: target.foundMaterial.id,
+      name: target.foundMaterial.name,
+      quantity: Number(target.quantity),
+      code: target.foundMaterial.code,
+      unit: target.foundMaterial.unit,
     };
 
-    setSelectedMaterials([...selectedMaterials, newItem]);
-
-    setFoundMaterial(null);
-
-    setCurrentQuantity("");
-    setSearchMatCode("");
+    if (isEdit) {
+      setEdit((prev) => ({
+        ...prev,
+        materials: [...prev.materials, newItem],
+        foundMaterial: null,
+        searchCode: "",
+        quantity: "",
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        materials: [...prev.materials, newItem],
+        foundMaterial: null,
+        searchCode: "",
+        quantity: "",
+      }));
+    }
   };
 
-  const removeMaterialFromRecipe = (id) => {
-    setSelectedMaterials(
-      selectedMaterials.filter((item) => item.materialId !== id),
-    );
-    console.log(`Material with ID ${id} removed from temporary recipe`);
+  // --- REMOÇÃO ---
+  const removeMaterial = (id, mode) => {
+    if (mode === "edit") {
+      setEdit((prev) => ({
+        ...prev,
+        materials: prev.materials.filter((m) => m.materialId !== id),
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        materials: prev.materials.filter((m) => m.materialId !== id),
+      }));
+    }
   };
 
+  // --- SUBMIT CREATE ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (selectedMaterials.length === 0) {
-      alert("Please add at least one raw material to the product!");
-      return;
-    }
+    if (form.materials.length === 0) return alert("Add at least one material!");
 
-    setIsSubmitting(true);
-    const finalProduct = {
-      name: productName,
-      price: Number(productPrice),
-      materials: selectedMaterials.map((item) => ({
-        rawMaterial: { id: item.materialId },
-        requiredQuantity: Number(item.quantity),
+    setUi((prev) => ({ ...prev, submitting: true }));
+    const payload = {
+      name: form.name,
+      price: Number(form.price),
+      materials: form.materials.map((m) => ({
+        rawMaterial: { id: m.materialId },
+        requiredQuantity: m.quantity,
       })),
     };
 
-    console.log("Submitting final product payload:", finalProduct);
-
     try {
-      await productService.create(finalProduct);
-      console.log("Product successfully created in database");
-      setProductName("");
-      setProductPrice("");
-      setSelectedMaterials([]);
+      await productService.create(payload);
+      setForm({
+        name: "",
+        price: "",
+        materials: [],
+        searchCode: "",
+        foundMaterial: null,
+        quantity: "",
+      });
+      loadInitialData();
     } catch (err) {
-      console.error("Error creating product:", err);
-      const serverMsg = err.response?.data?.message || "Internal Server Error";
-      alert(`Error: ${serverMsg}`);
+      alert("Error creating product.");
+      console.log(err);
     } finally {
-      setIsSubmitting(false);
+      setUi((prev) => ({ ...prev, submitting: false }));
     }
   };
 
-  const openDeleteModal = (id) => {
-    setSelectedId(id);
-    setIsModalOpen(true);
-  };
+  const handleUpdate = async () => {
+    if (edit.materials.length === 0) return alert("Recipe cannot be empty!");
+    setUi((prev) => ({ ...prev, submitting: true }));
 
-  const handleConfirmDelete = async () => {
-    setIsDeleting(true);
+    const payload = edit.materials.map((m) => ({
+      rawMaterial: { id: m.materialId },
+      requiredQuantity: m.quantity,
+    }));
+
     try {
-      await productService.delete(selectedId);
-      console.log(`Product with ID ${selectedId} deleted`);
-
-      setIsModalOpen(false);
-    } catch (error) {
-      console.error("Error deleting product:", error);
+      await productService.upadateMaterials(edit.product.id, payload);
+      setEdit((prev) => ({ ...prev, isOpen: false }));
+      loadInitialData();
+    } catch (err) {
+      alert("Error updating recipe.");
+      console.log(err);
     } finally {
-      setIsDeleting(false);
+      setUi((prev) => ({ ...prev, submitting: false }));
     }
+  };
+
+  const openDetails = (product) => {
+    setEdit({
+      isOpen: true,
+      product: product,
+      materials: product.materials.map((m) => ({
+        materialId: m.rawMaterial.id,
+        name: m.rawMaterial.name,
+        quantity: m.requiredQuantity,
+        code: m.rawMaterial.code,
+        unit: m.rawMaterial.unit,
+      })),
+      searchCode: "",
+      foundMaterial: null,
+      quantity: "",
+    });
   };
 
   return (
@@ -166,8 +225,8 @@ export default function ProductsPage() {
               <input
                 className="w-full border border-slate-200 rounded-md p-3 outline-none focus:border-[#E31E24] transition-colors bg-slate-50"
                 placeholder="Ex: Heavy Duty Damper"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
               />
             </div>
@@ -181,8 +240,8 @@ export default function ProductsPage() {
                 type="number"
                 step="0.01"
                 placeholder="0.00"
-                value={productPrice}
-                onChange={(e) => setProductPrice(e.target.value)}
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
                 required
               />
             </div>
@@ -202,33 +261,35 @@ export default function ProductsPage() {
                     <input
                       className="flex-1 border border-slate-200 rounded-md p-2.5 bg-white text-xs outline-none focus:border-[#E31E24] font-mono uppercase"
                       placeholder="Enter SKU Code (ex: AF-101)"
-                      value={searchMatCode}
-                      onChange={(e) => setSearchMatCode(e.target.value)}
+                      value={form.searchCode}
+                      onChange={(e) =>
+                        setForm({ ...form, searchCode: e.target.value })
+                      }
                     />
                     <button
                       type="button"
-                      onClick={handleFindMaterial}
+                      onClick={() => handleFindMaterial("create")}
                       className="bg-[#212529] text-white px-6 rounded-md text-[10px] font-black hover:bg-black transition-all uppercase tracking-widest"
                     >
-                      {searchingMat ? "Searching..." : "Find"}
+                      {ui.submitting ? "Searching..." : "Find"}
                     </button>
                   </div>
 
-                  {foundMaterial && (
+                  {form.foundMaterial && (
                     <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-emerald-100 animate-in slide-in-from-top-2 duration-300">
                       <div className="flex-1">
                         <p className="text-[9px] font-black text-emerald-500 uppercase">
                           Material Found
                         </p>
                         <p className="text-sm font-bold text-slate-700">
-                          {foundMaterial.name}
+                          {form.foundMaterial.name}
                           <span className="ml-2 text-[10px] text-slate-400 font-mono">
-                            ({foundMaterial.code})
+                            ({form.foundMaterial.code})
                           </span>
                         </p>
                         <p className="text-[10px] text-slate-400">
-                          Available: {foundMaterial.stockQuantity}{" "}
-                          {foundMaterial.unit}
+                          Available: {form.foundMaterial.stockQuantity}{" "}
+                          {form.foundMaterial.unit}
                         </p>
                       </div>
 
@@ -237,12 +298,14 @@ export default function ProductsPage() {
                           className="w-24 border-2 border-slate-100 rounded-md p-2 bg-slate-50 text-center outline-none focus:border-[#E31E24] font-bold text-sm"
                           type="number"
                           placeholder="Qty"
-                          value={currentQuantity}
-                          onChange={(e) => setCurrentQuantity(e.target.value)}
+                          value={form.currentQuantity}
+                          onChange={(e) =>
+                            setForm({ ...form, quantity: e.target.value })
+                          }
                         />
                         <button
                           type="button"
-                          onClick={addMaterialToRecipe}
+                          onClick={() => addMaterial("create")}
                           className="bg-[#E31E24] text-white h-10 w-10 rounded-md hover:bg-[#c1191f] transition-all font-black text-xl shadow-md flex items-center justify-center"
                         >
                           +
@@ -254,20 +317,21 @@ export default function ProductsPage() {
               </div>
 
               <div className="mt-4 space-y-2">
-                {selectedMaterials.map((item) => (
+                {form.materials.map((m) => (
                   <div
-                    key={item.materialId}
+                    key={m.materialId}
                     className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-100 shadow-sm animate-in fade-in zoom-in duration-200"
                   >
                     <span className="text-xs font-bold text-slate-600">
-                      {item.name}{" "}
+                      {m.name}{" "}
                       <span className="text-[#E31E24] ml-2 font-black">
-                        x {item.quantity}
+                        x {m.quantity}
                       </span>
                     </span>
+
                     <button
                       type="button"
-                      onClick={() => removeMaterialFromRecipe(item.materialId)}
+                      onClick={() => removeMaterial(m.materialId, "create")}
                       className="text-slate-300 hover:text-[#E31E24] transition-colors"
                     >
                       <span className="text-[10px] font-black uppercase">
@@ -281,10 +345,10 @@ export default function ProductsPage() {
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={ui.submitting}
               className="w-full bg-[#E31E24] text-white font-black py-4 rounded-md hover:bg-[#c1191f] shadow-lg shadow-red-200 disabled:opacity-50 transition-all uppercase tracking-widest text-sm"
             >
-              {isSubmitting ? "Saving to System..." : "Finish Registration"}
+              {ui.submitting ? "Saving..." : "Finish Registration"}
             </button>
           </form>
         </section>
@@ -297,7 +361,7 @@ export default function ProductsPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            {loading ? (
+            {ui.loading ? (
               <div className="bg-white p-10 rounded-xl border border-slate-100 text-center shadow-sm">
                 <span className="text-xs font-bold text-slate-400 uppercase animate-pulse">
                   Loading Catalog...
@@ -312,43 +376,204 @@ export default function ProductsPage() {
                   value={`R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
                   actions={
                     <>
-                      <button className="bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase">
-                        Edit Recipe
-                      </button>
+                      {/* Botão de Olho para ver detalhes */}
                       <button
-                        onClick={() => openDeleteModal(p.id)}
-                        className="bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
+                        onClick={() => openDetails(p)}
+                        className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2.5 rounded-xl text-[10px] font-black uppercase border border-slate-200 hover:border-[#212529]"
                       >
-                        Delete
+                        <Eye size={14} /> Info
+                      </button>
+
+                      {/* Botão de Deletar direto no card */}
+                      <button
+                        onClick={() =>
+                          setDeleteModal({ isOpen: true, id: p.id })
+                        }
+                        className="flex items-center justify-center gap-2 bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2.5 rounded-xl text-[10px] font-black uppercase border border-red-100 hover:border-[#E31E24]"
+                      >
+                        <Trash2 size={14} /> Delete
                       </button>
                     </>
                   }
                 >
-                  {p.materials?.map((item) => (
-                    <span
-                      key={item.id}
-                      className="text-[9px] bg-slate-50 text-slate-500 px-2 py-1 rounded-md font-bold uppercase border border-slate-200"
-                    >
-                      {item.rawMaterial?.name}:{" "}
-                      <span className="text-[#212529]">
-                        {item.requiredQuantity}
-                      </span>
-                    </span>
-                  ))}
+                  <div className="mt-2 flex flex-col gap-1">
+                    {/* Lista curta de materiais (máximo 3) */}
+                    <div className="flex flex-wrap items-end gap-1">
+                      {p.materials?.slice(0, 3).map((m, index) => (
+                        <span
+                          key={index}
+                          className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 font-medium"
+                        >
+                          {m.rawMaterial.name}
+                        </span>
+                      ))}
+
+                      {/* Indicador de "mais itens" */}
+                      {p.materials?.length > 3 && (
+                        <span className="text-[9px] text-slate-400 font-black ml-1">
+                          . . .
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </ActionCard>
               ))
             )}
           </div>
+          <DetailDrawer
+            isOpen={edit.isOpen}
+            onClose={() => setEdit({ ...edit, isOpen: false })}
+            title={edit.product?.name}
+          >
+            <div className="space-y-6">
+              {/* --- SEÇÃO DE EDIÇÃO DA RECEITA --- */}
+              <div>
+                <h4 className="text-[11px] font-black uppercase text-[#212529] mb-3 flex items-center gap-2">
+                  <Edit3 size={12} className="text-[#E31E24]" />
+                  Technical Recipe Management
+                </h4>
+
+                {/* Busca de Novo Material */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300 mb-4">
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      className="flex-1 border border-slate-200 rounded-lg p-2 text-xs outline-none focus:border-[#E31E24] font-mono uppercase"
+                      placeholder="Search SKU Code (ex: AF-101)"
+                      value={edit.searchCode}
+                      onChange={(e) =>
+                        setEdit({ ...edit, searchCode: e.target.value })
+                      }
+                    />
+                    <button
+                      onClick={() => handleFindMaterial("edit")}
+                      className="bg-black text-white px-3 rounded"
+                    >
+                      Find
+                    </button>
+                  </div>
+
+                  {edit.foundMaterial && (
+                    <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-emerald-100 animate-in slide-in-from-top-2 duration-300">
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-slate-700">
+                          {edit.foundMaterial.name}
+                        </p>
+
+                        <p className="text-[9px] text-slate-400">
+                          Stock: {edit.foundMaterial.stockQuantity}{" "}
+                          {edit.foundMaterial.unit}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <input
+                          className="w-16 border border-slate-200 rounded p-1.5 text-center font-bold text-xs outline-none focus:border-[#E31E24]"
+                          type="number"
+                          placeholder="Qty"
+                          value={edit.quantity}
+                          onChange={(e) =>
+                            setEdit({ ...edit, quantity: e.target.value })
+                          }
+                        />
+                        <button
+                          onClick={() => addMaterial("edit")}
+                          className="bg-[#E31E24] text-white h-8 w-8 rounded hover:bg-[#c1191f] transition-all font-black text-lg flex items-center justify-center shadow-sm"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Lista de Materiais Atual (Editável) */}
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {edit.materials.length > 0 ? (
+                    edit.materials.map((m) => (
+                      <div
+                        key={m.materialId}
+                        className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm group"
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-slate-600">
+                            {m.name}
+                          </span>
+                          <span className="text-[9px] font-mono text-slate-400">
+                            {m.code}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[10px] font-black bg-slate-100 text-[#212529] px-2 py-1 rounded border border-slate-200">
+                            {m.quantity} {m.unit}
+                          </span>
+                          <button
+                            onClick={() => removeMaterial(m.materialId, "edit")}
+                            className="text-slate-300 hover:text-[#E31E24] transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center py-4 text-[10px] font-bold text-slate-300 uppercase italic">
+                      No materials in recipe
+                    </p>
+                  )}
+                </div>
+
+                {/* Botão de Salvar Alterações */}
+                <button
+                  onClick={handleUpdate}
+                  className="w-full mt-4 bg-[#212529] text-white py-3 rounded-xl text-[10px] font-black uppercase hover:bg-black transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  <Save size={18} className="text-[#E31E24]" />
+                  Save Recipe Changes
+                </button>
+              </div>
+
+              {/* --- SEÇÃO DE TIMESTAMPS --- */}
+              <div className="pt-6 border-t border-slate-100">
+                <h4 className="text-[11px] font-black uppercase text-[#212529] mb-3 flex items-center gap-2">
+                  <Calendar size={12} className="text-[#E31E24]" /> System
+                  Timeline
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">
+                      Created At
+                    </p>
+                    <p className="text-[11px] font-black text-slate-600">
+                      {formatDate(edit.product?.createdAt)}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">
+                      Last Update
+                    </p>
+                    <p className="text-[11px] font-black text-slate-600">
+                      {formatDate(edit.product?.updatedAt)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DetailDrawer>
         </section>
       </div>
 
       <ConfirmModal
-        isOpen={isModalOpen}
-        isLoading={isDeleting}
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, id: null })}
+        isLoading={ui.deleting}
         title="DELETE RECORD"
         message="Are you sure you want to permanently remove this product and its technical composition?"
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={async () => {
+          setUi({ ...ui, deleting: true });
+          await productService.delete(deleteModal.id);
+          setDeleteModal({ isOpen: false, id: null });
+          loadInitialData();
+          setUi({ ...ui, deleting: false });
+        }}
       />
     </div>
   );
