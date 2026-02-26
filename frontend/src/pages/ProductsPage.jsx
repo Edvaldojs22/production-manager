@@ -4,6 +4,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import { productService } from "../services/productService";
 import { materialService } from "../services/materialService";
 import PageHeader from "../components/PageHeader";
+import ActionCard from "../components/ActionCard";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -31,7 +32,7 @@ export default function ProductsPage() {
         searchMatCode.toUpperCase(),
       );
       if (data) {
-        setFoundMaterial(data); // Guardamos o objeto todo aqui
+        setFoundMaterial(data);
       } else {
         alert("Material not found.");
       }
@@ -220,7 +221,6 @@ export default function ProductsPage() {
                           Material Found
                         </p>
                         <p className="text-sm font-bold text-slate-700">
-                          {/* Pegamos o nome direto do objeto encontrado */}
                           {foundMaterial.name}
                           <span className="ml-2 text-[10px] text-slate-400 font-mono">
                             ({foundMaterial.code})
@@ -305,60 +305,37 @@ export default function ProductsPage() {
               </div>
             ) : (
               products.map((p) => (
-                <div
+                <ActionCard
                   key={p.id}
-                  className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:border-[#E31E24]/30 transition-all group relative overflow-hidden"
-                >
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#E31E24] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-[10px] bg-[#212529] text-white px-2 py-0.5 rounded font-black uppercase">
-                          Product
-                        </span>
-                        <p className="font-black text-[#212529] text-base uppercase tracking-tight">
-                          {p.name}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        {p.materials?.map((item) => (
-                          <span
-                            key={item.id}
-                            className="text-[9px] bg-slate-50 text-slate-500 px-2 py-1 rounded-md font-bold uppercase border border-slate-200"
-                          >
-                            {item.rawMaterial?.name}:{" "}
-                            <span className="text-[#212529]">
-                              {item.requiredQuantity}
-                            </span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between sm:flex-col sm:items-end sm:justify-center gap-2 pt-4 sm:pt-0 border-t border-slate-50 sm:border-0">
-                      <div className="">
-                        <p className="text-[9px] font-bold text-slate-400 uppercase leading-none">
-                          Price
-                        </p>
-                        <p className="font-black text-[#E31E24] text-lg">
-                          R${" "}
-                          {p.price.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </p>
-                      </div>
-
+                  badge="Product"
+                  title={p.name}
+                  value={`R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+                  actions={
+                    <>
+                      <button className="bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase">
+                        Edit Recipe
+                      </button>
                       <button
                         onClick={() => openDeleteModal(p.id)}
-                        className="bg-red-50 text-[#E31E24] text-[10px] font-black px-4 py-2 rounded-lg uppercase transition-all hover:bg-[#E31E24] hover:text-white border border-red-100 hover:shadow-lg hover:shadow-red-200"
+                        className="bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
                       >
                         Delete
                       </button>
-                    </div>
-                  </div>
-                </div>
+                    </>
+                  }
+                >
+                  {p.materials?.map((item) => (
+                    <span
+                      key={item.id}
+                      className="text-[9px] bg-slate-50 text-slate-500 px-2 py-1 rounded-md font-bold uppercase border border-slate-200"
+                    >
+                      {item.rawMaterial?.name}:{" "}
+                      <span className="text-[#212529]">
+                        {item.requiredQuantity}
+                      </span>
+                    </span>
+                  ))}
+                </ActionCard>
               ))
             )}
           </div>

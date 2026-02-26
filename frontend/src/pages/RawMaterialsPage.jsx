@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { materialService } from "../services/materialService";
 import ConfirmModal from "../components/ConfirmModal";
 import PageHeader from "../components/PageHeader";
+import ActionCard from "../components/ActionCard";
 
 export default function RawMaterialsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -107,9 +108,7 @@ export default function RawMaterialsPage() {
       setIsStockModalOpen(false);
       loadMaterials(currentPage);
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message || "Unexpected error updating stock.";
-      alert(errorMessage);
+      console.log(err);
     }
   };
 
@@ -283,52 +282,15 @@ export default function RawMaterialsPage() {
               </div>
             ) : materials.length > 0 ? (
               materials.map((m) => (
-                <div
+                <ActionCard
                   key={m.id}
-                  className="bg-white rounded-xl shadow-sm border border-slate-100 hover:border-[#212529]/20 transition-all group overflow-hidden"
-                >
-                  <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex justify-between items-center">
-                    <span className="font-mono text-[10px] text-slate-400 font-bold uppercase">
-                      Code: {m.code || "N/A"}
-                    </span>
-                    <span className="text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-black">
-                      Stock
-                    </span>
-                  </div>
-
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-[#212529] font-black uppercase tracking-tight text-sm mb-1">
-                          {m.name}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-2 h-2 rounded-full ${m.stockQuantity > 5 ? "bg-emerald-500" : "bg-red-500 animate-pulse"}`}
-                          />
-                          <span
-                            className={`text-xs font-bold uppercase ${m.stockQuantity > 5 ? "text-emerald-600" : "text-red-600"}`}
-                          >
-                            {m.stockQuantity > 5
-                              ? "Stable Stock"
-                              : "Critical / Low"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span
-                          className={`text-2xl font-black ${m.stockQuantity > 5 ? "text-[#212529]" : "text-red-600"}`}
-                        >
-                          {m.stockQuantity}
-                        </span>
-                        <span className="block text-[10px] font-black text-slate-300 uppercase leading-none">
-                          {m.unit}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-50">
+                  badge="Material"
+                  subtitle={`Code: ${m.code}`}
+                  title={m.name}
+                  value={m.stockQuantity}
+                  unit={m.unit}
+                  actions={
+                    <>
                       <button
                         onClick={() => openStockModal(m)}
                         className="bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
@@ -341,9 +303,21 @@ export default function RawMaterialsPage() {
                       >
                         Delete
                       </button>
-                    </div>
+                    </>
+                  }
+                >
+                  {/* Children para Material: Indicador de status */}
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${m.stockQuantity > 5 ? "bg-emerald-500" : "bg-red-500 animate-pulse"}`}
+                    />
+                    <span
+                      className={`text-[10px] font-bold uppercase ${m.stockQuantity > 5 ? "text-emerald-600" : "text-red-600"}`}
+                    >
+                      {m.stockQuantity > 5 ? "Stable Stock" : "Critical Stock"}
+                    </span>
                   </div>
-                </div>
+                </ActionCard>
               ))
             ) : (
               <div className="col-span-full bg-white p-12 rounded-xl text-center border-2 border-dashed border-slate-200 text-slate-400 font-bold uppercase text-xs">
