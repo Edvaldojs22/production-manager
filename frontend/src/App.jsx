@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import RawMaterialsPage from "./pages/RawMaterialsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductionPage from "./pages/ProductionPage";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
           </div>
         </main>
       </div>
+      <Footer />
     </Router>
   );
 }

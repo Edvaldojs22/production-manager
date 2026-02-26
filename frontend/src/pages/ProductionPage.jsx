@@ -169,12 +169,6 @@ export default function ProductionPage() {
             </div>
           </div>
         )}
-
-        <footer className="w-full mt-20 pb-10">
-          <p className="text-2xl text-center font-black text-[#212529] opacity-20 uppercase tracking-widest">
-            AutoFlex
-          </p>
-        </footer>
       </div>
     </div>
   );
