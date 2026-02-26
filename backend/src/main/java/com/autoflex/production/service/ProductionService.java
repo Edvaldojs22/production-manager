@@ -10,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,45 +40,72 @@ public class ProductionService {
         return productRepository.findAllByOrderByPriceDesc();
     }
 
-    public List<Map<String, Object>>suggestProduction() {
+    public List<Map<String, Object>> suggestProduction() {
         List<Product> products = productRepository.findAllByOrderByPriceDesc();
         List<Map<String, Object>> suggestions = new ArrayList<>();
 
-        Map<Long, Double> tempStock = rawMaterialRepository.findAll()
+
+        Map<Long, Double> currentStock = rawMaterialRepository.findAll()
                 .stream()
                 .collect(Collectors.toMap(RawMaterial::getId, RawMaterial::getStockQuantity));
-        for(Product product : products){
-            int count = 0;
-            boolean canProduce = true;
 
-            while (canProduce){
-                for(ProductMaterial pm : product.getMaterials()){
-                    double needed = pm.getRequiredQuantity();
-                    double available = tempStock.getOrDefault(pm.getRawMaterial().getId(),0.0);
-                    if(available < needed){
-                        canProduce = false;
-                        break;
-                    }
-                }
-                if(canProduce){
-                    for (ProductMaterial pm : product.getMaterials()){
-                        Long id = pm.getRawMaterial().getId();
-                        tempStock.put(id, tempStock.get(id) - pm.getRequiredQuantity());
+        for (Product product : products) {
 
+            double maxProducible = Double.MAX_VALUE;
+            boolean hasMaterials = !product.getMaterials().isEmpty();
+
+            for (ProductMaterial pm : product.getMaterials()) {
+                double needed = pm.getRequiredQuantity();
+                double available = currentStock.getOrDefault(pm.getRawMaterial().getId(), 0.0);
+
+                if (needed > 0) {
+
+                    double possibleForThisMaterial = Math.floor(available / needed);
+
+
+                    if (possibleForThisMaterial < maxProducible) {
+                        maxProducible = possibleForThisMaterial;
                     }
-                    count++;
                 }
             }
-            if(count > 0 ){
+
+
+            if (hasMaterials && maxProducible > 0 && maxProducible != Double.MAX_VALUE) {
                 Map<String, Object> suggestion = new HashMap<>();
                 suggestion.put("productName", product.getName());
-                suggestion.put("quantity", count);
+                suggestion.put("quantity", (int) maxProducible);
                 suggestion.put("unitPrice", product.getPrice());
-                suggestion.put("totalValue", count * product.getPrice());
+                suggestion.put("totalValue", maxProducible * product.getPrice());
 
                 suggestions.add(suggestion);
             }
         }
-        return  suggestions;
+        return suggestions;
     }
+
+    public Product updateProductMaterials(Long id, List<ProductMaterial> incomingMaterials) {
+        Product product = findById(id);
+
+        if (incomingMaterials != null) {
+            for (ProductMaterial newItem : incomingMaterials) {
+             
+                Optional<ProductMaterial> existingItem = product.getMaterials().stream()
+                        .filter(m -> m.getRawMaterial().getId().equals(newItem.getRawMaterial().getId()))
+                        .findFirst();
+
+                if (existingItem.isPresent()) {
+                    
+                    existingItem.get().setRequiredQuantity(newItem.getRequiredQuantity());
+                } else {
+                  
+                    newItem.setProduct(product);
+                    product.getMaterials().add(newItem);
+                }
+            }
+        }
+
+     
+        return productRepository.save(product);
+    }
+
 }

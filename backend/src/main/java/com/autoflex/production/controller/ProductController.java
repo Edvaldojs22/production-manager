@@ -2,6 +2,7 @@ package com.autoflex.production.controller;
 
 
 import com.autoflex.production.entity.Product;
+import com.autoflex.production.entity.ProductMaterial;
 import com.autoflex.production.service.ProductionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productionService.delete(id);
@@ -47,5 +49,10 @@ public class ProductController {
     @GetMapping("/suggest")
     public ResponseEntity<List<Map<String, Object>>> getSuggestion() {
         return ResponseEntity.ok(productionService.suggestProduction());
+    }
+
+    @PutMapping("/{id}")
+    public  ResponseEntity<Product>updateMaterials(@PathVariable Long id, @RequestBody List<@Valid ProductMaterial> materials){
+        return ResponseEntity.ok(productionService.updateProductMaterials(id, materials));
     }
 }

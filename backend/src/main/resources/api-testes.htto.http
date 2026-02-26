@@ -31,6 +31,22 @@ Content-Type: application/json
   ]
 }
 
+### 2.1 Atualizar lista de materia do produto
+PUT http://localhost:8080/api/products/7
+Content-Type: application/json
+
+[
+    {
+      "rawMaterial": { "id": 3 },
+      "requiredQuantity": 40
+    },
+  {
+    "rawMaterial": { "id": 16 },
+    "requiredQuantity": 100
+  }
+]
+
+
 ### 3. Testar a Sugestão do mais caro ao mais barato
 GET http://localhost:8080/api/products/suggest
 
