@@ -3,6 +3,9 @@ import { materialService } from "../services/materialService";
 import ConfirmModal from "../components/ConfirmModal";
 import PageHeader from "../components/PageHeader";
 import ActionCard from "../components/ActionCard";
+import DetailDrawer from "../components/DetailDrawer";
+import { formatDate } from "../utils/fomateData";
+import { Clock, Trash2 } from "lucide-react";
 
 export default function RawMaterialsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +23,9 @@ export default function RawMaterialsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -31,6 +37,11 @@ export default function RawMaterialsPage() {
   useEffect(() => {
     loadMaterials(0);
   }, []);
+
+  const openDetails = (item) => {
+    setSelectedItem(item);
+    setIsDrawerOpen(true);
+  };
 
   const loadMaterials = async (page = 0) => {
     setLoading(true);
@@ -284,29 +295,29 @@ export default function RawMaterialsPage() {
               materials.map((m) => (
                 <ActionCard
                   key={m.id}
-                  badge="Material"
-                  subtitle={`Code: ${m.code}`}
+                  badge="Raw Material"
                   title={m.name}
+                  subtitle={m.code}
                   value={m.stockQuantity}
                   unit={m.unit}
+                  onViewClick={() => openDetails(m)}
                   actions={
                     <>
                       <button
                         onClick={() => openStockModal(m)}
-                        className="bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
+                        className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2.5 rounded-xl text-[10px] font-black uppercase border border-slate-200"
                       >
                         Stock
                       </button>
                       <button
                         onClick={() => openDeleteModal(m.id)}
-                        className="bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2 rounded-lg text-[10px] font-black uppercase"
+                        className="flex items-center justify-center gap-2 bg-red-50 hover:bg-[#E31E24] text-[#E31E24] hover:text-white transition-all py-2.5 rounded-xl text-[10px] font-black uppercase border border-red-100"
                       >
-                        Delete
+                        <Trash2 size={14} /> Delete
                       </button>
                     </>
                   }
                 >
-                  {/* Children para Material: Indicador de status */}
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-2 h-2 rounded-full ${m.stockQuantity > 5 ? "bg-emerald-500" : "bg-red-500 animate-pulse"}`}
@@ -325,6 +336,101 @@ export default function RawMaterialsPage() {
               </div>
             )}
           </div>
+          <DetailDrawer
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            title={selectedItem?.name}
+            // Se tiver 'code', é material. Se não, usamos o ID do produto.
+            subtitle={
+              selectedItem?.code
+                ? `SKU: ${selectedItem.code}`
+                : `Product ID: #${selectedItem?.id}`
+            }
+          >
+            {/* CONTEÚDO DINÂMICO BASEADO NO TIPO DE DADO */}
+            <div className="space-y-6">
+              {/* Se for PRODUTO (tem lista de materiais) */}
+              {selectedItem?.materials && (
+                <div className="space-y-4">
+                  <div className="bg-[#212529] p-5 rounded-3xl text-white">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">
+                      Market Price
+                    </p>
+                    <p className="text-2xl font-black text-[#E31E24]">
+                      R${" "}
+                      {selectedItem?.price?.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-400 uppercase">
+                      Technical Composition
+                    </p>
+                    {selectedItem.materials.map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex justify-between p-3 bg-slate-50 rounded-xl border border-slate-100"
+                      >
+                        <span className="text-xs font-bold text-slate-600">
+                          {m.rawMaterial.name}
+                        </span>
+                        <span className="text-xs font-black text-[#212529]">
+                          {m.requiredQuantity}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Se for MATERIAL (tem stockQuantity) */}
+              {selectedItem?.stockQuantity !== undefined && (
+                <div className="space-y-4">
+                  <div className="bg-[#212529] p-5 rounded-3xl text-white">
+                    <p className="text-[10px] font-bold uppercase text-slate-400">
+                      Current Stock
+                    </p>
+                    <p className="text-3xl font-black">
+                      {selectedItem.stockQuantity}{" "}
+                      <span className="text-sm text-[#E31E24]">
+                        {selectedItem.unit}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* TIMESTAMPS (Comum a ambos - vindo das suas classes Java) */}
+              <div className="pt-6 border-t border-slate-100 space-y-3">
+                <h4 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2">
+                  <Clock size={12} /> System Logs
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">
+                      Created:
+                    </span>
+                    {/* Note o 'createDAt' para material e 'createdAt' para produto conforme seu Java */}
+                    <span className="text-[11px] font-black text-slate-600">
+                      {formatDate(
+                        selectedItem?.createdAt || selectedItem?.createDAt,
+                      )}
+                    </span>
+                  </div>
+                  <div className="p-3 bg-slate-50 rounded-xl flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">
+                      Last Update:
+                    </span>
+                    <span className="text-[11px] font-black text-slate-600">
+                      {formatDate(selectedItem?.updatedAt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DetailDrawer>
 
           {totalPages > 1 && (
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-100 shadow-sm mt-6">
