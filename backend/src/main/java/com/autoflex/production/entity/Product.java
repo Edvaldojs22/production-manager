@@ -20,7 +20,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @NotBlank(message = "mandatory name")
     @Column(nullable = false)
     private String name;
@@ -33,7 +32,6 @@ public class Product {
     @NotEmpty(message = "A product must have at least one material.")
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<ProductMaterial> materials;
-
 
     @CreationTimestamp
     @Column(updatable = false)

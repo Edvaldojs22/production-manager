@@ -86,25 +86,25 @@ public class ProductionService {
     public Product updateProductMaterials(Long id, List<ProductMaterial> incomingMaterials) {
         Product product = findById(id);
 
-        if (incomingMaterials != null) {
-            for (ProductMaterial newItem : incomingMaterials) {
-             
-                Optional<ProductMaterial> existingItem = product.getMaterials().stream()
-                        .filter(m -> m.getRawMaterial().getId().equals(newItem.getRawMaterial().getId()))
-                        .findFirst();
+        product.getMaterials().removeIf(existing ->
+                incomingMaterials.stream().noneMatch(incoming ->
+                        incoming.getRawMaterial().getId().equals(existing.getRawMaterial().getId())
+                )
+        );
 
-                if (existingItem.isPresent()) {
-                    
-                    existingItem.get().setRequiredQuantity(newItem.getRequiredQuantity());
-                } else {
-                  
-                    newItem.setProduct(product);
-                    product.getMaterials().add(newItem);
-                }
+        for (ProductMaterial newItem : incomingMaterials) {
+            Optional<ProductMaterial> existingItem = product.getMaterials().stream()
+                    .filter(m -> m.getRawMaterial().getId().equals(newItem.getRawMaterial().getId()))
+                    .findFirst();
+            if (existingItem.isPresent()) {
+                existingItem.get().setRequiredQuantity(newItem.getRequiredQuantity());
+            } else {
+
+                newItem.setProduct(product);
+                product.getMaterials().add(newItem);
             }
         }
 
-     
         return productRepository.save(product);
     }
 

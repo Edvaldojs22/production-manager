@@ -44,7 +44,6 @@ public class RawMaterialController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         rawMaterialService.delete(id);
         return ResponseEntity.noContent().build();
-
     }
 
     @PatchMapping("/{id}/stock")
