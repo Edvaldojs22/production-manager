@@ -1,49 +1,56 @@
-const ActionCard = ({
+// components/ActionCard.jsx
+import { Eye } from "lucide-react";
+
+export default function ActionCard({
   badge,
   title,
   subtitle,
   value,
   unit,
+  onViewClick,
   children,
   actions,
-}) => {
+}) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border cursor-pointer border-slate-100 hover:border-red-200 transition-all group overflow-hidden relative">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden relative group">
       <div className="bg-slate-50 px-4 py-2 border-b border-slate-100 flex justify-between items-center">
-        <span className="text-[10px] bg-[#212529] text-white px-2 py-0.5 rounded font-black uppercase tracking-wider">
+        <span className="text-[10px] bg-[#212529] text-white px-2 py-0.5 rounded font-black uppercase tracking-widest">
           {badge}
         </span>
-        {subtitle && (
-          <span className="font-mono text-[10px] text-slate-400 font-bold uppercase">
-            {subtitle}
-          </span>
+
+        {onViewClick && (
+          <button
+            onClick={onViewClick}
+            className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-[#E31E24] transition-all border border-transparent hover:border-slate-200"
+            title="View Details"
+          >
+            <Eye size={14} />
+          </button>
         )}
       </div>
 
       <div className="p-5">
         <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <h3 className="text-[#212529] font-black uppercase tracking-tight text-base mb-2 group-hover:text-[#E31E24] transition-colors">
+          <div>
+            <h3 className="text-[#212529] font-black uppercase text-base">
               {title}
             </h3>
-
-            <div className="flex flex-wrap gap-1.5">{children}</div>
+            <p className="font-mono text-[10px] text-slate-400 font-bold uppercase">
+              {subtitle}
+            </p>
           </div>
 
-          <div className="text-right ml-4">
-            <p className="text-[9px] font-bold text-slate-400 uppercase leading-none mb-1">
-              Value / Qty
-            </p>
+          <div className="text-right">
             <span className="text-xl font-black text-[#212529] block">
               {value}
             </span>
-            {unit && (
-              <span className="block text-[10px] font-black text-slate-300 uppercase leading-none">
-                {unit}
-              </span>
-            )}
+            <span className="block text-[10px] font-black text-slate-300 uppercase">
+              {unit}
+            </span>
           </div>
         </div>
+
+        <div className="mb-4">{children}</div>
 
         <div className="grid grid-cols-2 gap-2 pt-4 border-t border-slate-50">
           {actions}
@@ -51,6 +58,4 @@ const ActionCard = ({
       </div>
     </div>
   );
-};
-
-export default ActionCard;
+}
