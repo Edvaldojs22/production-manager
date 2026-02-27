@@ -57,33 +57,42 @@
 2. Configure the database in `src/main/resources/application.properties` with your MySQL credentials.
 3. Run the server:
 
-```bash
-# From the project root or backend folder
 mvn spring-boot:run
-⚛️ Front-end Setup
-Navigate to the frontend folder and install dependencies:
 
-bash
-cd frontend
-npm install
-Create a .env file in the root of the frontend folder:
+Código
 
-env
-VITE_API_URL=http://localhost:8080
-Launch the application:
+---
 
-bash
-npm run dev
-🧪 API Validation
-The project includes .http request files in src/test/resources for quick validation.
-You can use the REST Client (VS Code) or IntelliJ HTTP Client to:
+### ⚛️ Front-end Setup
 
-Test CRUD operations.
+1. Navigate to the frontend folder and install dependencies:
 
-Validate the production algorithm directly from your IDE.
+   cd frontend <br>
+   npm install
 
-<p align="center">
-<b>Developed for the AutoFlex Technical Challenge</b><br>
-<i>Standardized in English for international technical compliance.</i>
-</p>
-```
+2. Create a `.env` file in the root of the frontend folder:
+
+   VITE_API_URL=http://localhost:8080
+
+3. Launch the application:
+
+   npm run dev
+
+---
+
+## 🧪 API Validation
+
+The project includes `.http` request files in `src/test/resources` for quick validation.  
+You can use the **REST Client (VS Code)** or **IntelliJ HTTP Client** to:
+
+- Test CRUD operations.
+- Validate the production algorithm directly from your IDE.
+
+---
+
+<div align="center">
+
+**Developed for the AutoFlex Technical Challenge**  
+_Standardized in English for international technical compliance._
+
+</div>
