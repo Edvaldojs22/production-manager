@@ -30,8 +30,8 @@ export default function ProductionPage() {
   };
 
   return (
-    <div className="min-h-screen  p-6 font-sans">
-      <div className="max-w-6xl mx-auto space-y-10">
+    <div className="  p-6 font-sans  ">
+      <div className="max-w-6xl mx-auto space-y-20">
         <PageHeader
           title="Production"
           highlight="Optimizer"
@@ -50,7 +50,7 @@ export default function ProductionPage() {
           </button>
         </PageHeader>
 
-        {hasCalculated && (
+        {hasCalculated ? (
           <div className="space-y-6 animate-in fade-in duration-500">
             {suggestions.length > 0 && (
               <div className="bg-[#212529] rounded-xl p-6 text-white flex flex-col md:flex-row justify-between items-center border-l-8 border-emerald-500 shadow-xl">
@@ -85,7 +85,7 @@ export default function ProductionPage() {
                 suggestions.map((item, index) => (
                   <div
                     key={index}
-                    className="group bg-white rounded-xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-200 flex flex-col relative overflow-hidden"
+                    className="group bg-white rounded-xl shadow-sm    border border-slate-200 flex flex-col relative overflow-hidden"
                   >
                     <div className="bg-[#212529] px-4 py-2 flex justify-between items-center">
                       <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
@@ -152,10 +152,6 @@ export default function ProductionPage() {
                             Ready for assembly
                           </span>
                         </div>
-
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0">
-                          <span className="text-[#E31E24] text-lg">→</span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -167,6 +163,27 @@ export default function ProductionPage() {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+        ) : (
+          <div className="  flex items-center justify-center min-h-[400px] animate-in fade-in zoom-in duration-700">
+            <div className="relative w-full flex flex-col items-center">
+              <div className=" text-center relative z-10">
+                <h3 className="text-[#212529] font-black uppercase tracking-[0.3em] text-sm mb-2">
+                  Optimizer <span className="text-[#E31E24]">Idle</span>
+                </h3>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="h-[1px] w-8 bg-slate-300"></span>
+                  <p className="text-slate-400 text-[10px] font-bold uppercase">
+                    Waiting for simulation
+                  </p>
+                  <span className="h-[1px] w-8 bg-slate-300"></span>
+                </div>
+              </div>
+
+              <span className="absolute  -bottom-30 pointer-events-none text-[220px] font-black italic text-red-500/10 select-none -z-0">
+                AF
+              </span>
             </div>
           </div>
         )}

@@ -1,4 +1,3 @@
-// components/ActionCard.jsx
 import { Eye } from "lucide-react";
 
 export default function ActionCard({

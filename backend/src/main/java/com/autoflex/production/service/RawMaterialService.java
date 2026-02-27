@@ -31,7 +31,6 @@ public class RawMaterialService {
             );
         }
 
-
         try {
             repository.deleteById(id);
         } catch (Exception e) {
@@ -61,6 +60,7 @@ public class RawMaterialService {
 
         Double newStock = material.getStockQuantity() + quantityChange;
 
+        System.out.print(newStock);
         if(newStock < 0){
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,"Insufficient stock. Operation aborted."

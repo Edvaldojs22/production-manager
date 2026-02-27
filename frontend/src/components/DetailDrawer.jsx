@@ -11,7 +11,6 @@ const DetailDrawer = ({ isOpen, onClose, title, subtitle, children }) => {
       />
 
       <div className="relative flex flex-col z-10 w-full max-w-lg bg-white shadow-2xl animate-in zoom-in-95 duration-300 rounded-[2rem] overflow-hidden border border-slate-200">
-        {/* Header */}
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <div className="flex items-center gap-3">
             <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-100">
@@ -39,10 +38,8 @@ const DetailDrawer = ({ isOpen, onClose, title, subtitle, children }) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-8 bg-white">{children}</div>
 
-        {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50 text-center">
           <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
             Autoflex Production System v1.0

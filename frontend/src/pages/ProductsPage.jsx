@@ -377,7 +377,6 @@ export default function ProductsPage() {
                   value={`R$ ${p.price.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
                   actions={
                     <>
-                      {/* Botão de Olho para ver detalhes */}
                       <button
                         onClick={() => openDetails(p)}
                         className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-[#212529] text-[#212529] hover:text-white transition-all py-2.5 rounded-xl text-[10px] font-black uppercase border border-slate-200 hover:border-[#212529]"
@@ -385,7 +384,6 @@ export default function ProductsPage() {
                         <Eye size={14} /> Info
                       </button>
 
-                      {/* Botão de Deletar direto no card */}
                       <button
                         onClick={() =>
                           setDeleteModal({ isOpen: true, id: p.id })
@@ -398,7 +396,6 @@ export default function ProductsPage() {
                   }
                 >
                   <div className="mt-2 flex flex-col gap-1">
-                    {/* Lista curta de materiais (máximo 3) */}
                     <div className="flex flex-wrap items-end gap-1">
                       {p.materials?.slice(0, 3).map((m, index) => (
                         <span
@@ -409,7 +406,6 @@ export default function ProductsPage() {
                         </span>
                       ))}
 
-                      {/* Indicador de "mais itens" */}
                       {p.materials?.length > 3 && (
                         <span className="text-[9px] text-slate-400 font-black ml-1">
                           . . .
@@ -427,14 +423,12 @@ export default function ProductsPage() {
             title={edit.product?.name}
           >
             <div className="space-y-6">
-              {/* --- SEÇÃO DE EDIÇÃO DA RECEITA --- */}
               <div>
                 <h4 className="text-[11px] font-black uppercase text-[#212529] mb-3 flex items-center gap-2">
                   <Edit3 size={12} className="text-[#E31E24]" />
                   Technical Recipe Management
                 </h4>
 
-                {/* Busca de Novo Material */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-dashed border-slate-300 mb-4">
                   <div className="flex gap-2 mb-3">
                     <input
@@ -486,7 +480,6 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Lista de Materiais Atual (Editável) */}
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                   {edit.materials.length > 0 ? (
                     edit.materials.map((m) => (
@@ -522,7 +515,6 @@ export default function ProductsPage() {
                   )}
                 </div>
 
-                {/* Botão de Salvar Alterações */}
                 <button
                   onClick={handleUpdate}
                   className="w-full mt-4 bg-[#212529] text-white py-3 rounded-xl text-[10px] font-black uppercase hover:bg-black transition-all shadow-md flex items-center justify-center gap-2"
@@ -532,7 +524,6 @@ export default function ProductsPage() {
                 </button>
               </div>
 
-              {/* --- SEÇÃO DE TIMESTAMPS --- */}
               <div className="pt-6 border-t border-slate-100">
                 <h4 className="text-[11px] font-black uppercase text-[#212529] mb-3 flex items-center gap-2">
                   <Calendar size={12} className="text-[#E31E24]" /> System

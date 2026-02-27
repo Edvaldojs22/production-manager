@@ -350,16 +350,13 @@ export default function RawMaterialsPage() {
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
             title={selectedItem?.name}
-            // Se tiver 'code', é material. Se não, usamos o ID do produto.
             subtitle={
               selectedItem?.code
                 ? `SKU: ${selectedItem.code}`
                 : `Product ID: #${selectedItem?.id}`
             }
           >
-            {/* CONTEÚDO DINÂMICO BASEADO NO TIPO DE DADO */}
             <div className="space-y-6">
-              {/* Se for PRODUTO (tem lista de materiais) */}
               {selectedItem?.materials && (
                 <div className="space-y-4">
                   <div className="bg-[#212529] p-5 rounded-3xl text-white">
@@ -395,7 +392,6 @@ export default function RawMaterialsPage() {
                 </div>
               )}
 
-              {/* Se for MATERIAL (tem stockQuantity) */}
               {selectedItem?.stockQuantity !== undefined && (
                 <div className="space-y-4">
                   <div className="bg-[#212529] p-5 rounded-3xl text-white">
@@ -412,7 +408,6 @@ export default function RawMaterialsPage() {
                 </div>
               )}
 
-              {/* TIMESTAMPS (Comum a ambos - vindo das suas classes Java) */}
               <div className="pt-6 border-t border-slate-100 space-y-3">
                 <h4 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2">
                   <Clock size={12} /> System Logs
@@ -422,7 +417,6 @@ export default function RawMaterialsPage() {
                     <span className="text-[10px] font-bold text-slate-400 uppercase">
                       Created:
                     </span>
-                    {/* Note o 'createDAt' para material e 'createdAt' para produto conforme seu Java */}
                     <span className="text-[11px] font-black text-slate-600">
                       {formatDate(
                         selectedItem?.createdAt || selectedItem?.createDAt,

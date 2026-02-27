@@ -55,10 +55,7 @@ function App() {
         </main>
       </div>
       <Footer />
-      <ToastContainer
-        autoClose={4000}
-        theme="colored" /* Isso ajuda a aplicar as cores base */
-      />
+      <ToastContainer autoClose={4000} theme="colored" />
     </Router>
   );
 }
