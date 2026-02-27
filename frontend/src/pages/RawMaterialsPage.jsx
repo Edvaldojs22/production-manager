@@ -6,6 +6,7 @@ import ActionCard from "../components/ActionCard";
 import DetailDrawer from "../components/DetailDrawer";
 import { formatDate } from "../utils/fomateData";
 import { Clock, Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 export default function RawMaterialsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,6 +55,7 @@ export default function RawMaterialsPage() {
       setCurrentPage(data.page?.number || 0);
     } catch (err) {
       console.log("Error loading materials:", err);
+      toast.error("Error loading materials");
       setMaterials([]);
     } finally {
       setLoading(false);
@@ -63,7 +65,6 @@ export default function RawMaterialsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     const dataToSubmit = {
       ...formData,
       stockQuantity: Number(formData.stockQuantity),
@@ -72,9 +73,11 @@ export default function RawMaterialsPage() {
     try {
       await materialService.createMaterial(dataToSubmit);
       setFormData({ name: "", code: "", unit: "", stockQuantity: "" });
+      toast.success("Raw material created");
       loadMaterials(currentPage);
     } catch (err) {
-      console.log(err);
+      console.log("Error in creation: " + err);
+      toast.error("Error in creation");
     } finally {
       setIsSubmitting(false);
     }
@@ -93,6 +96,7 @@ export default function RawMaterialsPage() {
       setTotalPages(1);
     } catch (err) {
       console.error("Material not found", err);
+      toast.info("Material not found!");
       setMaterials([]);
     } finally {
       setLoading(false);
@@ -108,7 +112,7 @@ export default function RawMaterialsPage() {
   const handleUpdateStock = async (isAdding) => {
     const value = Number(stockValue);
     if (!value || value <= 0) {
-      alert("Please enter a valid value greater than zero");
+      toast.info("Please enter a valid value greater than zero");
       return;
     }
 
@@ -116,21 +120,27 @@ export default function RawMaterialsPage() {
 
     try {
       await materialService.updateStock(selectedMaterial.id, finalValue);
+      toast.success("Stock update completed");
       setIsStockModalOpen(false);
       loadMaterials(currentPage);
     } catch (err) {
-      console.log(err);
+      const erro = err.response?.data?.message || "Error updating stock";
+      toast.info(erro);
     }
   };
 
   const handleConfirmDelete = async () => {
     setDeleting(true);
+
     try {
       await materialService.deleteMaterial(selectedId);
+      toast.success("Raw material excluded");
       await loadMaterials(currentPage);
       setIsModalOpen(false);
-    } catch (erro) {
-      console.log(erro);
+    } catch (err) {
+      const erro =
+        err.response?.data?.message || "Error when deleting raw material";
+      toast.error(erro);
     } finally {
       setDeleting(false);
     }
@@ -524,7 +534,7 @@ export default function RawMaterialsPage() {
           isLoading={deleting}
           title={"CONFIRM DELETION"}
           message={
-            "This action will permanently remove the material from the inventory. Do you wish to proceed?"
+            "It will only be possible to delete this material if it is not linked to a product. This action will permanently remove the material from inventory. Do you want to continue?"
           }
           onClose={() => setIsModalOpen(false)}
           onConfirm={handleConfirmDelete}

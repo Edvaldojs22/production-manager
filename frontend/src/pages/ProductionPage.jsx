@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { productService } from "../services/productService";
 import PageHeader from "../components/PageHeader";
+import { toast } from "react-toastify";
 
 export default function ProductionPage() {
   const [suggestions, setSuggestions] = useState([]);
@@ -11,12 +12,12 @@ export default function ProductionPage() {
     setLoading(true);
     try {
       const data = await productService.getProductionSuggestion();
-      console.log("Production data received:", data);
       setSuggestions(data);
       setHasCalculated(true);
+      toast.success("Simulation completed");
     } catch (err) {
       console.error("Error fetching production suggestions:", err);
-      alert("Error connecting to the workshop server.");
+      toast.error("request error");
     } finally {
       setLoading(false);
     }

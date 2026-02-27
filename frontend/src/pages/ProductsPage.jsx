@@ -8,6 +8,7 @@ import ActionCard from "../components/ActionCard";
 import DetailDrawer from "../components/DetailDrawer";
 import { Calendar, Edit3, Eye, Save, Trash2 } from "lucide-react";
 import { formatDate } from "../utils/fomateData";
+import { toast } from "react-toastify";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -67,10 +68,11 @@ export default function ProductsPage() {
           ? setEdit((prev) => ({ ...prev, foundMaterial: data }))
           : setForm((prev) => ({ ...prev, foundMaterial: data }));
       } else {
-        alert("Material not found.");
+        toast.info("Material not found.");
       }
     } catch (err) {
-      console.error(err);
+      const erro = err.response.data?.message || "Material not found";
+      toast.info(erro);
     } finally {
       setUi((prev) => ({ ...prev, submitting: false }));
     }
@@ -85,10 +87,11 @@ export default function ProductsPage() {
     if (
       target.materials.some((m) => m.materialId === target.foundMaterial.id)
     ) {
-      alert("Material already in recipe!");
+      toast.info("Material already in recipe!");
       return;
     }
 
+    toast.success("Added raw material");
     const newItem = {
       materialId: target.foundMaterial.id,
       name: target.foundMaterial.name,
@@ -116,7 +119,6 @@ export default function ProductsPage() {
     }
   };
 
-  // --- REMOÇÃO ---
   const removeMaterial = (id, mode) => {
     if (mode === "edit") {
       setEdit((prev) => ({
@@ -131,10 +133,10 @@ export default function ProductsPage() {
     }
   };
 
-  // --- SUBMIT CREATE ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.materials.length === 0) return alert("Add at least one material!");
+    if (form.materials.length === 0)
+      return toast.info("Add at least one material!");
 
     setUi((prev) => ({ ...prev, submitting: true }));
     const payload = {
@@ -156,17 +158,19 @@ export default function ProductsPage() {
         foundMaterial: null,
         quantity: "",
       });
+      toast.success("Product created successfully");
       loadInitialData();
     } catch (err) {
-      alert("Error creating product.");
-      console.log(err);
+      toast.error("Error creating product.");
+      console.log(err.response?.data);
     } finally {
       setUi((prev) => ({ ...prev, submitting: false }));
     }
   };
 
   const handleUpdate = async () => {
-    if (edit.materials.length === 0) return alert("Recipe cannot be empty!");
+    if (edit.materials.length === 0)
+      return toast.info("Recipe cannot be empty!");
     setUi((prev) => ({ ...prev, submitting: true }));
 
     const payload = edit.materials.map((m) => ({
@@ -177,9 +181,10 @@ export default function ProductsPage() {
     try {
       await productService.upadateMaterials(edit.product.id, payload);
       setEdit((prev) => ({ ...prev, isOpen: false }));
+      toast.success("Product updated successfully");
       loadInitialData();
     } catch (err) {
-      alert("Error updating recipe.");
+      toast.error("Error updating recipe.");
       console.log(err);
     } finally {
       setUi((prev) => ({ ...prev, submitting: false }));
@@ -246,11 +251,7 @@ export default function ProductsPage() {
               />
             </div>
 
-            <div className="p-5 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-              <p className="text-[11px] font-black text-[#212529] mb-3 uppercase tracking-wider">
-                Technical Composition (Raw Materials)
-              </p>
-
+            <div>
               <div className="p-5 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                 <p className="text-[11px] font-black text-[#212529] mb-3 uppercase tracking-wider">
                   Technical Composition (Add Materials)
@@ -571,6 +572,7 @@ export default function ProductsPage() {
           setUi({ ...ui, deleting: true });
           await productService.delete(deleteModal.id);
           setDeleteModal({ isOpen: false, id: null });
+          toast.success("product deleted");
           loadInitialData();
           setUi({ ...ui, deleting: false });
         }}

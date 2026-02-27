@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-
+import { ToastContainer } from "react-toastify";
 import RawMaterialsPage from "./pages/RawMaterialsPage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductionPage from "./pages/ProductionPage";
@@ -55,6 +55,10 @@ function App() {
         </main>
       </div>
       <Footer />
+      <ToastContainer
+        autoClose={4000}
+        theme="colored" /* Isso ajuda a aplicar as cores base */
+      />
     </Router>
   );
 }
